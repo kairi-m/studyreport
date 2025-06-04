@@ -21,7 +21,7 @@ if (!paper) {
 }
 
 // APIエンドポイントの設定
-const API_BASE_URL = "http://localhost:3002/api";
+const API_BASE_URL = "https://openai-proxy-server-w980.onrender.com";
 const API_ENDPOINTS = {
   summarizeSection: `${API_BASE_URL}/summarize-section`,
   summarizeFull: `${API_BASE_URL}/summarize-full`
@@ -141,15 +141,34 @@ document.getElementById("summarizeAllBtn").addEventListener("click", async () =>
     summarizeAllBtn.disabled = true;
     summaryText.value = "要約を開始します...";
 
-    const structuredText = paper.sections.map(section => 
-      `${section.title}\n${section.content}`
-    ).join("\n\n");
+    // セクションの要約を結合して全体要約のベースとして使用
+    const sectionSummaries = paper.sections.map(section => {
+      const summary = section.summary || section.content;
+      return `${section.title}\n${summary}`;
+    }).join("\n\n");
+
+    // テキストの長さを制限（約16K文字）
+    const maxLength = 16000;
+    const truncatedText = sectionSummaries.length > maxLength 
+      ? sectionSummaries.slice(0, maxLength) + "..."
+      : sectionSummaries;
 
     const res = await fetch(API_ENDPOINTS.summarizeFull, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: structuredText })
+      headers: { 
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({ 
+        content: truncatedText,
+        title: paper.title
+      })
     });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.error || `APIエラー: ${res.status}`);
+    }
 
     const data = await res.json();
     if (data.error) {
@@ -163,6 +182,7 @@ document.getElementById("summarizeAllBtn").addEventListener("click", async () =>
   } catch (e) {
     console.error("全体要約エラー:", e);
     summaryText.value = `要約エラー: ${e.message}`;
+    alert("要約処理中にエラーが発生しました。時間をおいて再度お試しください。");
   } finally {
     summarizeAllBtn.disabled = false;
   }
