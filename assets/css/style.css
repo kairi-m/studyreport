@@ -631,4 +631,45 @@ body {
   #editSectionContents::-webkit-scrollbar-thumb:hover {
     background: #555;
   }
+
+  /* PDFビューアーモーダルのスタイル */
+  .pdf-view-content {
+    width: 90% !important;
+    height: 90vh !important;
+    max-width: none !important;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #pdfViewContainer {
+    flex: 1;
+    margin-bottom: 20px;
+    min-height: 0;
+  }
+
+  #pdfViewer {
+    width: 100%;
+    height: 100%;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+  }
+
+  .file-btn {
+    background-color: #17a2b8;
+    color: white;
+    padding: 4px 8px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+
+  .file-btn:hover {
+    background-color: #138496;
+  }
+
+  .file-cell {
+    width: 80px;
+    text-align: center;
+  }
   

@@ -3,10 +3,12 @@ window.addEventListener("DOMContentLoaded", () => {
     const editModal = document.getElementById("editModal");
     const deleteModal = document.getElementById("deleteModal");
     const summaryViewModal = document.getElementById("summaryViewModal");
+    const pdfViewModal = document.getElementById("pdfViewModal");
     const editTitle = document.getElementById("editTitle");
     const editDate = document.getElementById("editDate");
     const deleteTitle = document.getElementById("deleteTitle");
     const summaryViewContent = document.getElementById("summaryViewContent");
+    const pdfViewer = document.getElementById("pdfViewer");
   
     // 現在編集・削除対象の論文ID
     let currentPaperId = null;
@@ -27,7 +29,7 @@ window.addEventListener("DOMContentLoaded", () => {
       const tbody = document.getElementById("tableBody");
   
       if (entries.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='4'>保存された論文はありません。</td></tr>";
+        tbody.innerHTML = "<tr><td colspan='5'>保存された論文はありません。</td></tr>";
         return;
       }
   
@@ -42,6 +44,11 @@ window.addEventListener("DOMContentLoaded", () => {
                 <button class="view-btn-small" onclick="handleViewSummary('${entry.id}')">閲覧</button>
               </div>
             ` : '❌'}
+          </td>
+          <td class="file-cell">
+            ${entry.fileData ? `
+              <button class="file-btn" onclick="handleViewPdf('${entry.id}')">表示</button>
+            ` : '未登録'}
           </td>
           <td class="action-cell">
             <div class="action-buttons">
@@ -99,6 +106,22 @@ window.addEventListener("DOMContentLoaded", () => {
       summaryViewModal.style.display = "block";
     };
   
+    // 📄 PDFビューアーを開く
+    window.handleViewPdf = (paperId) => {
+      const papers = loadPapers();
+      const paper = papers.find(p => p.id === paperId);
+      if (!paper || !paper.fileData) return;
+
+      pdfViewer.src = paper.fileData;
+      pdfViewModal.style.display = "block";
+    };
+
+    // PDFビューアーを閉じる
+    document.getElementById("closePdfViewBtn").addEventListener("click", () => {
+      pdfViewModal.style.display = "none";
+      pdfViewer.src = "";
+    });
+
     // 編集を保存
     document.getElementById("saveEditBtn").addEventListener("click", () => {
       const papers = loadPapers();
@@ -148,6 +171,10 @@ window.addEventListener("DOMContentLoaded", () => {
       }
       if (event.target === summaryViewModal) {
         summaryViewModal.style.display = "none";
+      }
+      if (event.target === pdfViewModal) {
+        pdfViewModal.style.display = "none";
+        pdfViewer.src = "";
       }
     });
 

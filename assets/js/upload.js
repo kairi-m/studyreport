@@ -5,10 +5,18 @@ const saveBtn = document.getElementById("saveBtn");
 let extractedText = "";
 let titleGuess = "";
 let sections = [];
+let fileDataUrl = null;
 
 fileInput.addEventListener("change", async (e) => {
   const file = e.target.files[0];
   if (!file) return;
+
+  // PDFファイルをData URLとして読み込む
+  const dataUrlReader = new FileReader();
+  dataUrlReader.onload = function() {
+    fileDataUrl = dataUrlReader.result;
+  };
+  dataUrlReader.readAsDataURL(file);
 
   const reader = new FileReader();
   reader.onload = async function () {
@@ -96,7 +104,8 @@ saveBtn.addEventListener("click", () => {
     sections: sections,
     summarized: false,
     sectionSummaries: '',
-    summary: ''
+    summary: '',
+    fileData: fileDataUrl  // PDFファイルのData URLを保存
   };
   entries.push(newEntry);
   localStorage.setItem("papers", JSON.stringify(entries));
