@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>論文管理システム</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <h1>📄 論文管理システム</h1>
+  <a href="upload.html" class="upload-btn">＋ 論文をアップロードする</a>
+
+  <table id="paperTable">
+    <thead>
+      <tr>
+        <th>タイトル</th>
+        <th>アップロード日</th>
+        <th>要約</th>
+        <th class="action-column">操作</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+      <!-- ここに一覧がJSで追加されます -->
+    </tbody>
+  </table>
+
+  <!-- 編集モーダル -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <h2>論文情報の編集</h2>
+      <div class="form-group">
+        <label for="editTitle">タイトル:</label>
+        <input type="text" id="editTitle" class="form-input">
+      </div>
+      <div class="form-group">
+        <label for="editDate">日付:</label>
+        <input type="date" id="editDate" class="form-input">
+      </div>
+      <div class="form-group">
+        <label for="editSummary">要約内容:</label>
+        <textarea id="editSummary" class="form-input" rows="6"></textarea>
+      </div>
+      <div class="modal-buttons">
+        <button id="saveEditBtn" class="primary-btn">保存</button>
+        <button id="cancelEditBtn" class="secondary-btn">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 削除確認モーダル -->
+  <div id="deleteModal" class="modal">
+    <div class="modal-content">
+      <h2>論文の削除</h2>
+      <p>以下の論文を削除してもよろしいですか？</p>
+      <p id="deleteTitle" class="delete-confirm-title"></p>
+      <div class="modal-buttons">
+        <button id="confirmDeleteBtn" class="danger-btn">削除する</button>
+        <button id="cancelDeleteBtn" class="secondary-btn">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

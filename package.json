@@ -1,0 +1,16 @@
+{
+  "name": "study-report",
+  "version": "1.0.0",
+  "description": "論文要約システム",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "openai": "^3.2.1"
+  }
+} 
+ 

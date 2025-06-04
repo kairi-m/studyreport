@@ -1,0 +1,375 @@
+body {
+    font-family: sans-serif;
+    margin: 40px;
+    background-color: #f7f7f7;
+  }
+  
+  h1 {
+    color: #333;
+  }
+  
+  .upload-btn {
+    display: inline-block;
+    margin-bottom: 20px;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+  }
+  
+  /* テーブルのスタイル */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+  }
+  
+  th, td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+  
+  th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+  }
+
+  tr:hover {
+    background-color: #f8f9fa;
+  }
+
+  .title-cell {
+    max-width: 400px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .date-cell {
+    width: 120px;
+    white-space: nowrap;
+  }
+
+  .status-cell {
+    width: 80px;
+    text-align: center;
+  }
+
+  .action-column {
+    width: 250px;
+  }
+
+  .action-cell {
+    padding: 8px;
+  }
+
+  /* ボタンのスタイル */
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.2s;
+  }
+
+  .detail-btn {
+    background-color: #007bff;
+    color: white;
+  }
+
+  .detail-btn:hover {
+    background-color: #0056b3;
+    color: white;
+  }
+
+  .edit-btn {
+    background-color: #ffc107;
+    color: #000;
+  }
+
+  .edit-btn:hover {
+    background-color: #e0a800;
+  }
+
+  .delete-btn {
+    background-color: #dc3545;
+    color: white;
+  }
+
+  .delete-btn:hover {
+    background-color: #c82333;
+  }
+
+  /* モーダル関連のスタイル */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+  }
+
+  .modal-content {
+    position: relative;
+    background-color: white;
+    margin: 10% auto;
+    padding: 20px;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .form-group {
+    margin: 15px 0;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #495057;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+
+  .modal-buttons {
+    margin-top: 20px;
+    text-align: right;
+  }
+
+  .delete-confirm-title {
+    margin: 15px 0;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-left: 3px solid #dc3545;
+    font-weight: bold;
+  }
+
+  .primary-btn {
+    background-color: #28a745;
+    color: white;
+    font-weight: bold;
+  }
+
+  .primary-btn:hover {
+    background-color: #218838;
+  }
+
+  .secondary-btn {
+    background-color: #6c757d;
+    color: white;
+  }
+
+  .secondary-btn:hover {
+    background-color: #5a6268;
+  }
+
+  .danger-btn {
+    background-color: #dc3545;
+    color: white;
+  }
+
+  .danger-btn:hover {
+    background-color: #c82333;
+  }
+
+  button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.65;
+  }
+
+  /* 既存のスタイル */
+  .section-selector {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .section-list {
+    margin: 15px 0;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .section-item {
+    display: flex;
+    align-items: center;
+    margin: 8px 0;
+    padding: 8px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+  }
+
+  .section-item:hover {
+    background-color: #e9ecef;
+  }
+
+  .section-item input[type="checkbox"] {
+    margin-right: 10px;
+  }
+
+  .section-item.selected {
+    background-color: #e3f2fd;
+    border-left: 3px solid #007bff;
+  }
+
+  .section-item label {
+    flex-grow: 1;
+    cursor: pointer;
+  }
+
+  .summary-area {
+    margin-top: 20px;
+  }
+
+  .paragraph-summary {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .paragraph-summary h4 {
+    margin: 0 0 10px 0;
+    color: #007bff;
+    font-size: 1.1em;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 5px;
+  }
+
+  .summary-content {
+    line-height: 1.6;
+  }
+
+  .summary-content ul {
+    margin: 10px 0;
+    padding-left: 20px;
+  }
+
+  .summary-content li {
+    margin: 5px 0;
+  }
+
+  .sections-preview {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .section-item {
+    margin: 10px 0;
+    padding: 10px;
+    border-left: 3px solid #007bff;
+    background-color: #f8f9fa;
+  }
+
+  .section-item strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #007bff;
+  }
+
+  button {
+    padding: 8px 15px;
+    margin: 5px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #0056b3;
+  }
+
+  button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
+
+  /* プログレス表示用 */
+  .progress-message {
+    margin: 10px 0;
+    padding: 8px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    color: #495057;
+  }
+
+  .home-btn {
+    display: inline-block;
+    padding: 8px 15px;
+    background-color: #6c757d;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+
+  .home-btn:hover {
+    background-color: #5a6268;
+    color: white;
+  }
+
+  .home-btn i {
+    margin-right: 5px;
+  }
+
+  textarea {
+    background-color: white;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 10px;
+    resize: vertical;
+  }
+
+  textarea:focus {
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+  }
+
+  .error-message {
+    color: #dc3545;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    padding: 10px;
+    margin: 10px 0;
+  }
+  

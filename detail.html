@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>論文詳細</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <h1>📘 論文詳細</h1>
+  <a href="index.html" class="home-btn">← ホームに戻る</a>
+  <div id="paperInfo">
+    <!-- 論文のタイトルなど -->
+  </div>
+
+  <div>
+    <h2>各セクションの要約</h2>
+    
+    <!-- セクション選択エリア -->
+    <div id="sectionSelector" class="section-selector">
+      <h3>セクション選択</h3>
+      <div id="sectionList" class="section-list">
+        <!-- セクションのリストがJSで追加されます -->
+      </div>
+      <button id="summarizeSelectedBtn" class="primary-btn">選択したセクションを要約</button>
+    </div>
+
+    <!-- 要約結果表示エリア -->
+    <div id="paragraphSummaries" class="summary-area"></div>
+    
+    <h3>全体要約</h3>
+    <textarea id="summaryText" rows="10" style="width:100%"></textarea><br>
+    <button id="summarizeAllBtn">全体を要約する</button>
+  </div>
+
+  <button id="saveBtn">保存して戻る</button>
+
+  <script src="assets/js/detail.js"></script>
+</body>
+</html>
