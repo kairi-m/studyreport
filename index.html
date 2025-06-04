@@ -35,10 +35,6 @@
         <label for="editDate">日付:</label>
         <input type="date" id="editDate" class="form-input">
       </div>
-      <div class="form-group">
-        <label for="editSummary">要約内容:</label>
-        <textarea id="editSummary" class="form-input" rows="6"></textarea>
-      </div>
       <div class="modal-buttons">
         <button id="saveEditBtn" class="primary-btn">保存</button>
         <button id="cancelEditBtn" class="secondary-btn">キャンセル</button>
@@ -55,6 +51,16 @@
       <div class="modal-buttons">
         <button id="confirmDeleteBtn" class="danger-btn">削除する</button>
         <button id="cancelDeleteBtn" class="secondary-btn">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 要約閲覧モーダル -->
+  <div id="summaryViewModal" class="modal">
+    <div class="modal-content summary-view-content">
+      <div id="summaryViewContent"></div>
+      <div class="modal-buttons">
+        <button id="closeSummaryViewBtn" class="secondary-btn">閉じる</button>
       </div>
     </div>
   </div>

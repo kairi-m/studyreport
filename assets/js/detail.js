@@ -120,6 +120,7 @@ summarizeSelectedBtn.addEventListener("click", async () => {
     }
 
     paper.sectionSummaries = allSummaries;
+    paper.summarized = true;
     savePaperChanges();
   } catch (e) {
     console.error("要約エラー:", e);

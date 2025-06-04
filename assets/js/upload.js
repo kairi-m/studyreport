@@ -94,7 +94,9 @@ saveBtn.addEventListener("click", () => {
     date: new Date().toISOString().split("T")[0],
     text: extractedText,
     sections: sections,
-    summarized: false
+    summarized: false,
+    sectionSummaries: '',
+    summary: ''
   };
   entries.push(newEntry);
   localStorage.setItem("papers", JSON.stringify(entries));
