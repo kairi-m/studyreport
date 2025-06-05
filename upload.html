@@ -4,7 +4,11 @@
   <meta charset="UTF-8" />
   <title>論文アップロード</title>
   <link rel="stylesheet" href="assets/css/style.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+  <script>
+    // PDF.jsのワーカーの設定
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+  </script>
 </head>
 <body>
   <h1>📤 論文アップロード</h1>

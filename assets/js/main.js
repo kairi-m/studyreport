@@ -1,4 +1,9 @@
 window.addEventListener("DOMContentLoaded", () => {
+    // PDF.jsのワーカーの設定
+    if (typeof pdfjsLib !== 'undefined') {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+    }
+
     // モーダル要素の取得
     const editModal = document.getElementById("editModal");
     const deleteModal = document.getElementById("deleteModal");
@@ -13,19 +18,109 @@ window.addEventListener("DOMContentLoaded", () => {
     // 現在編集・削除対象の論文ID
     let currentPaperId = null;
   
-    // 📥 localStorage からデータを読み込む
-    const loadPapers = () => {
-      return JSON.parse(localStorage.getItem("papers") || "[]");
+    // IndexedDBの初期化
+    let db;
+    const dbName = "papersDB";
+    const dbVersion = 1;
+  
+    const initDB = () => {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(dbName, dbVersion);
+  
+            request.onerror = (event) => {
+                console.error("DBの初期化に失敗しました:", event);
+                reject("DBエラー");
+            };
+  
+            request.onsuccess = (event) => {
+                db = event.target.result;
+                resolve(db);
+            };
+  
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains("papers")) {
+                    db.createObjectStore("papers", { keyPath: "id" });
+                }
+                if (!db.objectStoreNames.contains("files")) {
+                    db.createObjectStore("files", { keyPath: "id" });
+                }
+            };
+        });
     };
   
-    // 💾 データを保存
-    const savePapers = (papers) => {
-      localStorage.setItem("papers", JSON.stringify(papers));
+    // 論文データを読み込む
+    const loadPaper = async (paperId) => {
+        try {
+            const transaction = db.transaction(["papers", "files"], "readonly");
+            const paperStore = transaction.objectStore("papers");
+            const fileStore = transaction.objectStore("files");
+  
+            const paper = await new Promise((resolve, reject) => {
+                const request = paperStore.get(paperId);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+  
+            if (!paper) {
+                throw new Error("論文が見つかりません");
+            }
+  
+            if (paper.hasFile) {
+                const fileData = await new Promise((resolve, reject) => {
+                    const request = fileStore.get(paperId);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+                if (fileData) {
+                    paper.fileData = fileData.fileData;
+                }
+            }
+  
+            return paper;
+        } catch (e) {
+            console.error('読み込みエラー:', e);
+            throw e;
+        }
+    };
+  
+    // 全ての論文データを読み込む
+    const loadPapers = async () => {
+        try {
+            const transaction = db.transaction(["papers", "files"], "readonly");
+            const paperStore = transaction.objectStore("papers");
+            const fileStore = transaction.objectStore("files");
+  
+            const papers = await new Promise((resolve, reject) => {
+                const request = paperStore.getAll();
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+  
+            // ファイルデータを読み込む
+            for (const paper of papers) {
+                if (paper.hasFile) {
+                    const fileData = await new Promise((resolve, reject) => {
+                        const request = fileStore.get(paper.id);
+                        request.onsuccess = () => resolve(request.result);
+                        request.onerror = () => reject(request.error);
+                    });
+                    if (fileData) {
+                        paper.fileData = fileData.fileData;
+                    }
+                }
+            }
+  
+            return papers;
+        } catch (e) {
+            console.error('読み込みエラー:', e);
+            return [];
+        }
     };
   
     // 📄 テーブルの更新
-    const updateTable = () => {
-      const entries = loadPapers();
+    const updateTable = async () => {
+      const entries = await loadPapers();
       const tbody = document.getElementById("tableBody");
   
       if (entries.length === 0) {
@@ -46,7 +141,7 @@ window.addEventListener("DOMContentLoaded", () => {
             ` : '❌'}
           </td>
           <td class="file-cell">
-            ${entry.fileData ? `
+            ${entry.hasFile ? `
               <button class="file-btn" onclick="handleViewPdf('${entry.id}')">表示</button>
             ` : '未登録'}
           </td>
@@ -62,9 +157,8 @@ window.addEventListener("DOMContentLoaded", () => {
     };
   
     // ✏️ 編集モーダルを開く
-    window.handleEdit = (paperId) => {
-      const papers = loadPapers();
-      const paper = papers.find(p => p.id === paperId);
+    window.handleEdit = async (paperId) => {
+      const paper = await loadPaper(paperId);
       if (!paper) return;
   
       currentPaperId = paperId;
@@ -74,9 +168,8 @@ window.addEventListener("DOMContentLoaded", () => {
     };
   
     // 🗑️ 削除モーダルを開く
-    window.handleDelete = (paperId) => {
-      const papers = loadPapers();
-      const paper = papers.find(p => p.id === paperId);
+    window.handleDelete = async (paperId) => {
+      const paper = await loadPaper(paperId);
       if (!paper) return;
   
       currentPaperId = paperId;
@@ -85,9 +178,8 @@ window.addEventListener("DOMContentLoaded", () => {
     };
   
     // 📖 要約閲覧モーダルを開く
-    window.handleViewSummary = (paperId) => {
-      const papers = loadPapers();
-      const paper = papers.find(p => p.id === paperId);
+    window.handleViewSummary = async (paperId) => {
+      const paper = await loadPaper(paperId);
       if (!paper) return;
   
       summaryViewContent.innerHTML = `
@@ -107,9 +199,8 @@ window.addEventListener("DOMContentLoaded", () => {
     };
   
     // 📄 PDFビューアーを開く
-    window.handleViewPdf = (paperId) => {
-      const papers = loadPapers();
-      const paper = papers.find(p => p.id === paperId);
+    window.handleViewPdf = async (paperId) => {
+      const paper = await loadPaper(paperId);
       if (!paper || !paper.fileData) return;
 
       pdfViewer.src = paper.fileData;
@@ -123,29 +214,54 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
     // 編集を保存
-    document.getElementById("saveEditBtn").addEventListener("click", () => {
-      const papers = loadPapers();
-      const paperIndex = papers.findIndex(p => p.id === currentPaperId);
-      if (paperIndex === -1) return;
+    document.getElementById("saveEditBtn").addEventListener("click", async () => {
+      const paper = await loadPaper(currentPaperId);
+      if (!paper) return;
   
-      papers[paperIndex] = {
-        ...papers[paperIndex],
-        title: editTitle.value,
-        date: editDate.value
-      };
+      paper.title = editTitle.value;
+      paper.date = editDate.value;
 
-      savePapers(papers);
-      editModal.style.display = "none";
-      updateTable();
+      try {
+        const transaction = db.transaction(["papers"], "readwrite");
+        const paperStore = transaction.objectStore("papers");
+        await paperStore.put(paper);
+        editModal.style.display = "none";
+        await updateTable();
+      } catch (error) {
+        console.error('保存に失敗しました:', error);
+        alert('変更の保存に失敗しました。');
+      }
     });
 
+    // 論文を削除
+    const deletePaper = async (paperId) => {
+        try {
+            const transaction = db.transaction(["papers", "files"], "readwrite");
+            const paperStore = transaction.objectStore("papers");
+            const fileStore = transaction.objectStore("files");
+
+            // ファイルデータの削除
+            await fileStore.delete(paperId);
+            // 論文データの削除
+            await paperStore.delete(paperId);
+
+            return true;
+        } catch (e) {
+            console.error('削除エラー:', e);
+            throw e;
+        }
+    };
+
     // 削除を実行
-    document.getElementById("confirmDeleteBtn").addEventListener("click", () => {
-      const papers = loadPapers();
-      const updatedPapers = papers.filter(p => p.id !== currentPaperId);
-      savePapers(updatedPapers);
-      deleteModal.style.display = "none";
-      updateTable();
+    document.getElementById("confirmDeleteBtn").addEventListener("click", async () => {
+        try {
+            await deletePaper(currentPaperId);
+            deleteModal.style.display = "none";
+            await updateTable();
+        } catch (error) {
+            console.error('削除に失敗しました:', error);
+            alert('論文の削除に失敗しました。');
+        }
     });
 
     // モーダルを閉じる
@@ -178,6 +294,22 @@ window.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // 初期表示
-    updateTable();
+    // 初期化処理
+    initDB().then(() => {
+        // LocalStorageからIndexedDBへの移行処理
+        const existingData = localStorage.getItem("papers");
+        if (existingData) {
+            const papers = JSON.parse(existingData);
+            savePapers(papers).then(() => {
+                // 移行が成功したら、LocalStorageのデータを削除
+                localStorage.removeItem("papers");
+                updateTable();
+            });
+        } else {
+            updateTable();
+        }
+    }).catch(error => {
+        console.error("DBの初期化に失敗しました:", error);
+        alert("データベースの初期化に失敗しました。ページを再読み込みしてください。");
+    });
 });
