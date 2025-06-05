@@ -295,18 +295,37 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
     // 初期化処理
-    initDB().then(() => {
-        // LocalStorageからIndexedDBへの移行処理
-        const existingData = localStorage.getItem("papers");
-        if (existingData) {
-            const papers = JSON.parse(existingData);
-            savePapers(papers).then(() => {
+    initDB().then(async () => {
+        try {
+            // LocalStorageからIndexedDBへの移行処理
+            const existingData = localStorage.getItem("papers");
+            if (existingData) {
+                const papers = JSON.parse(existingData);
+                const transaction = db.transaction(["papers", "files"], "readwrite");
+                const paperStore = transaction.objectStore("papers");
+                const fileStore = transaction.objectStore("files");
+
+                for (const paper of papers) {
+                    if (paper.fileData) {
+                        await fileStore.put({
+                            id: paper.id,
+                            fileData: paper.fileData
+                        });
+                        
+                        const paperWithoutFile = {...paper};
+                        delete paperWithoutFile.fileData;
+                        paperWithoutFile.hasFile = true;
+                        await paperStore.put(paperWithoutFile);
+                    } else {
+                        await paperStore.put(paper);
+                    }
+                }
                 // 移行が成功したら、LocalStorageのデータを削除
                 localStorage.removeItem("papers");
-                updateTable();
-            });
-        } else {
-            updateTable();
+            }
+            await updateTable();
+        } catch (error) {
+            console.error("データの移行に失敗しました:", error);
         }
     }).catch(error => {
         console.error("DBの初期化に失敗しました:", error);
