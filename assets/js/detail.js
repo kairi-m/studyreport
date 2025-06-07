@@ -159,7 +159,42 @@ function displaySectionList() {
 // 保存された要約の表示
 const displaySavedSummaries = () => {
     if (paper.sectionSummaries) {
-        paragraphSummaries.innerHTML = paper.sectionSummaries;
+        // 既存の要約をテキストエリアとして表示
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = paper.sectionSummaries;
+        const summaryDivs = Array.from(tempDiv.querySelectorAll('.paragraph-summary'));
+        const editableSummaries = summaryDivs.map(div => {
+            const title = div.querySelector('h4').textContent;
+            const content = div.querySelector('.summary-content').textContent;
+            return `<div class="paragraph-summary">
+                <h4>${title}</h4>
+                <textarea class="summary-textarea">${content}</textarea>
+            </div>`;
+        }).join('');
+        paragraphSummaries.innerHTML = editableSummaries;
+
+        // テキストエリアの変更を監視して自動保存
+        const textareas = paragraphSummaries.querySelectorAll('.summary-textarea');
+        textareas.forEach(textarea => {
+            textarea.addEventListener('input', async () => {
+                try {
+                    // 現在のすべての要約を収集
+                    const currentSummaries = Array.from(paragraphSummaries.querySelectorAll('.paragraph-summary')).map(div => {
+                        const title = div.querySelector('h4').textContent;
+                        const content = div.querySelector('textarea').value;
+                        return `<div class="paragraph-summary">
+                            <h4>${title}</h4>
+                            <div class="summary-content">${content}</div>
+                        </div>`;
+                    }).join('');
+
+                    paper.sectionSummaries = currentSummaries;
+                    await savePaper(paper);
+                } catch (error) {
+                    console.error('要約の保存に失敗しました:', error);
+                }
+            });
+        });
     }
     summaryText.value = paper.summary || "";
 };
@@ -179,6 +214,18 @@ summarizeSelectedBtn.addEventListener("click", async () => {
         }
 
         summarizeSelectedBtn.disabled = true;
+        // 既存の要約結果をDOMパースして管理しやすい形式に変換
+        let existingSummaries = new Map();
+        if (paper.sectionSummaries) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = paper.sectionSummaries;
+            const summaryDivs = tempDiv.querySelectorAll('.paragraph-summary');
+            summaryDivs.forEach(div => {
+                const title = div.querySelector('h4').textContent.replace('の要約:', '');
+                existingSummaries.set(title, div.querySelector('.summary-content').textContent);
+            });
+        }
+
         let allSummaries = "";
         paragraphSummaries.innerHTML = "<p>要約を開始します...</p>";
 
@@ -198,10 +245,14 @@ summarizeSelectedBtn.addEventListener("click", async () => {
                 }
                 
                 const summary = data.reply;
-                allSummaries += `<div class="paragraph-summary">
+                const newSummaryDiv = `<div class="paragraph-summary">
                     <h4>${section.title}の要約:</h4>
                     <div class="summary-content">${summary}</div>
                 </div>`;
+                
+                // 新しい要約を追加し、既存の要約から現在のセクションを削除
+                existingSummaries.delete(section.title);
+                allSummaries += newSummaryDiv;
                 
                 paragraphSummaries.innerHTML = allSummaries;
             } catch (e) {
@@ -211,9 +262,20 @@ summarizeSelectedBtn.addEventListener("click", async () => {
             }
         }
 
+        // 残りの既存の要約を追加
+        for (const [title, content] of existingSummaries.entries()) {
+            allSummaries += `<div class="paragraph-summary">
+                <h4>${title}の要約:</h4>
+                <div class="summary-content">${content}</div>
+            </div>`;
+        }
+
         paper.sectionSummaries = allSummaries;
         paper.summarized = true;
         await savePaper(paper);
+
+        // 要約結果を表示（編集可能な形式で）
+        displaySavedSummaries();
     } catch (e) {
         console.error("要約エラー:", e);
         paragraphSummaries.innerHTML = `<p class="error-message">要約処理中にエラーが発生しました: ${e.message}</p>`;

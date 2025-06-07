@@ -228,13 +228,53 @@ window.addEventListener("DOMContentLoaded", () => {
     window.handleViewSummary = async (paperId) => {
         const paper = await loadPaper(paperId);
         if (!paper) return;
-  
+
+        // セクション要約を解析してソート
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = paper.sectionSummaries || '';
+        const summaryDivs = Array.from(tempDiv.querySelectorAll('.paragraph-summary'));
+        
+        // セクション番号でソート
+        const sortedSummaryDivs = summaryDivs.sort((a, b) => {
+            const titleA = a.querySelector('h4').textContent;
+            const titleB = b.querySelector('h4').textContent;
+            
+            // セクション番号を抽出（例：「2.1」や「3」などの形式に対応）
+            const getSecNumber = (title) => {
+                const match = title.match(/^(\d+(\.\d+)*)/);
+                if (match) {
+                    return match[1].split('.').map(num => parseInt(num, 10));
+                }
+                return [Infinity];
+            };
+
+            const numA = getSecNumber(titleA);
+            const numB = getSecNumber(titleB);
+
+            // 階層的な番号付けの比較（例：2.1 vs 2.2）
+            for (let i = 0; i < Math.max(numA.length, numB.length); i++) {
+                const a = numA[i] || 0;
+                const b = numB[i] || 0;
+                if (a !== b) return a - b;
+            }
+            return 0;
+        });
+
+        const sortedSummaries = sortedSummaryDivs.map(div => {
+            const title = div.querySelector('h4').textContent;
+            const content = div.querySelector('.summary-content').textContent;
+            return `<div class="paragraph-summary">
+                <h4>${title}</h4>
+                <div class="summary-content">${content}</div>
+            </div>`;
+        }).join('');
+
         summaryViewContent.innerHTML = `
             <h3>${paper.title}の要約</h3>
             <div class="summary-sections">
                 ${paper.sectionSummaries ? `
                     <h4>セクション要約:</h4>
-                    <div class="section-summaries">${paper.sectionSummaries}</div>
+                    <div class="section-summaries">${sortedSummaries}</div>
                 ` : ''}
                 ${paper.summary ? `
                     <h4>全体要約:</h4>
