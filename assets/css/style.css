@@ -744,4 +744,21 @@ body {
     background-color: #cccccc;
     cursor: not-allowed;
   }
+
+  .sort-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0 5px;
+    font-size: 16px;
+    color: #666;
+  }
+
+  .sort-btn:hover {
+    color: #333;
+  }
+
+  .sort-btn.active {
+    color: #007bff;
+  }
   

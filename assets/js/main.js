@@ -165,6 +165,26 @@ window.addEventListener("DOMContentLoaded", () => {
         }
     };
   
+    // ソート状態を管理
+    let sortDirection = 'desc'; // 初期値を'desc'（降順）に設定
+
+    // ソートボタンのイベントリスナー
+    document.getElementById("sortDateBtn").addEventListener("click", async () => {
+        const sortBtn = document.getElementById("sortDateBtn");
+        
+        // ソート方向を切り替え
+        if (sortDirection === 'desc') {
+            sortDirection = 'asc';
+            sortBtn.textContent = '↑ 古い順';
+        } else {
+            sortDirection = 'desc';
+            sortBtn.textContent = '↓ 新しい順';
+        }
+        
+        sortBtn.classList.add('active');
+        await updateTable();
+    });
+
     // 📄 テーブルの更新
     const updateTable = async () => {
         const entries = await loadPapers();
@@ -173,6 +193,15 @@ window.addEventListener("DOMContentLoaded", () => {
         if (entries.length === 0) {
             tbody.innerHTML = "<tr><td colspan='5'>保存された論文はありません。</td></tr>";
             return;
+        }
+
+        // ソートが有効な場合は日付でソート
+        if (sortDirection !== null) {
+            entries.sort((a, b) => {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
+            });
         }
   
         tbody.innerHTML = entries.map(entry => `
@@ -373,6 +402,10 @@ window.addEventListener("DOMContentLoaded", () => {
                 // 移行が成功したら、LocalStorageのデータを削除
                 localStorage.removeItem("papers");
             }
+            // 初期表示時にソートボタンの状態を設定
+            const sortBtn = document.getElementById("sortDateBtn");
+            sortBtn.textContent = '↓';
+            sortBtn.classList.add('active');
             await updateTable();
         } catch (error) {
             console.error("データの移行に失敗しました:", error);
