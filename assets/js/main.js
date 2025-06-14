@@ -186,9 +186,44 @@ window.addEventListener("DOMContentLoaded", () => {
         await updateTable();
     });
 
+    // 検索機能の実装
+    const searchInput = document.getElementById("searchInput");
+    let allEntries = []; // 全エントリーを保持
+
+    // 検索処理
+    const performSearch = (searchTerm) => {
+        if (!searchTerm) {
+            updateTable(allEntries);
+            return;
+        }
+
+        const searchTermLower = searchTerm.toLowerCase();
+        const filteredEntries = allEntries.filter(entry => {
+            // タイトルで検索
+            const titleMatch = entry.title.toLowerCase().includes(searchTermLower);
+            
+            // キーワードで検索
+            const keywordMatch = (entry.keywords || []).some(keyword => 
+                keyword.toLowerCase().includes(searchTermLower)
+            );
+
+            return titleMatch || keywordMatch;
+        });
+
+        updateTable(filteredEntries);
+    };
+
+    // 検索入力のイベントリスナー
+    searchInput.addEventListener("input", (e) => {
+        performSearch(e.target.value);
+    });
+
     // 📄 テーブルの更新
-    const updateTable = async () => {
-        const entries = await loadPapers();
+    const updateTable = async (entries = null) => {
+        if (entries === null) {
+            entries = await loadPapers();
+            allEntries = entries; // 全エントリーを保存
+        }
         const tbody = document.getElementById("tableBody");
   
         if (entries.length === 0) {
@@ -210,9 +245,12 @@ window.addEventListener("DOMContentLoaded", () => {
                 <td class="title-cell">${entry.title}</td>
                 <td class="keyword-cell">
                     <div class="keyword-container">
-                        ${(entry.keywords || []).map(keyword => 
-                            `<span class="keyword-tag" title="${keyword.trim()}">${keyword.trim()}</span>`
-                        ).join('')}
+                        ${(entry.keywords && entry.keywords.length > 0) ? 
+                            entry.keywords.map(keyword => 
+                                `<span class="keyword-tag" title="${keyword.trim()}">${keyword.trim()}</span>`
+                            ).join('') : 
+                            '<span class="keyword-tag empty-keyword">編集から入力可能</span>'
+                        }
                     </div>
                 </td>
                 <td class="date-cell">${entry.date}</td>
