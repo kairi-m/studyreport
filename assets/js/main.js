@@ -10,6 +10,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const summaryViewModal = document.getElementById("summaryViewModal");
     const pdfViewModal = document.getElementById("pdfViewModal");
     const editTitle = document.getElementById("editTitle");
+    const editKeywords = document.getElementById("editKeywords");
     const editDate = document.getElementById("editDate");
     const deleteTitle = document.getElementById("deleteTitle");
     const summaryViewContent = document.getElementById("summaryViewContent");
@@ -191,7 +192,7 @@ window.addEventListener("DOMContentLoaded", () => {
         const tbody = document.getElementById("tableBody");
   
         if (entries.length === 0) {
-            tbody.innerHTML = "<tr><td colspan='5'>保存された論文はありません。</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='6'>保存された論文はありません。</td></tr>";
             return;
         }
 
@@ -207,6 +208,13 @@ window.addEventListener("DOMContentLoaded", () => {
         tbody.innerHTML = entries.map(entry => `
             <tr>
                 <td class="title-cell">${entry.title}</td>
+                <td class="keyword-cell">
+                    <div class="keyword-container">
+                        ${(entry.keywords || []).map(keyword => 
+                            `<span class="keyword-tag" title="${keyword.trim()}">${keyword.trim()}</span>`
+                        ).join('')}
+                    </div>
+                </td>
                 <td class="date-cell">${entry.date}</td>
                 <td class="status-cell">
                     ${entry.summarized ? `
@@ -239,6 +247,7 @@ window.addEventListener("DOMContentLoaded", () => {
   
         currentPaperId = paperId;
         editTitle.value = paper.title;
+        editKeywords.value = (paper.keywords || []).join(', ');
         editDate.value = paper.date;
         editModal.style.display = "block";
     };
@@ -335,6 +344,7 @@ window.addEventListener("DOMContentLoaded", () => {
         if (!paper) return;
   
         paper.title = editTitle.value;
+        paper.keywords = editKeywords.value.split(',').map(k => k.trim()).filter(k => k);
         paper.date = editDate.value;
 
         try {

@@ -761,4 +761,30 @@ body {
   .sort-btn.active {
     color: #007bff;
   }
+
+  .keyword-cell {
+    max-width: 200px;
+    padding: 8px;
+  }
+
+  .keyword-tag {
+    display: inline-block;
+    background-color: #e9ecef;
+    color: #495057;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin: 2px;
+    font-size: 12px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .keyword-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
   

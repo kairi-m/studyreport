@@ -191,6 +191,7 @@ saveBtn.addEventListener("click", async () => {
     const newEntry = {
         id: Date.now().toString(),
         title: titleGuess || "Untitled",
+        keywords: [], // 空のキーワード配列を初期値として設定
         date: new Date().toISOString().split("T")[0],
         text: extractedText,
         sections: sections,
